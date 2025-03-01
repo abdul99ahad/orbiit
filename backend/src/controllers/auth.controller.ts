@@ -62,3 +62,4 @@ export const logOutController = asyncHandler(async (req: Request, res: Response)
     message: 'Logged out successfully',
   });
 });
+
