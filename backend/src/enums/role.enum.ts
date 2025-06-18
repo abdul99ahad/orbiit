@@ -27,3 +27,4 @@ export const Permissions = {
 
 export type RoleType = keyof typeof Roles;
 export type PermissionType = keyof typeof Permissions;
+

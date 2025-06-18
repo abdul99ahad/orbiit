@@ -58,4 +58,3 @@ export const joinWorkspaceByInviteService = async (
 
   return { workspaceId: workspace._id, role: role.name };
 };
-

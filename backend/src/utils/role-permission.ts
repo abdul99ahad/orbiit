@@ -34,4 +34,3 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
     Permissions.EDIT_TASK,
   ],
 };
-

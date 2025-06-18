@@ -13,4 +13,3 @@ const isAuthenticated = async (req: Request, _res: Response, next: NextFunction)
 };
 
 export default isAuthenticated;
-

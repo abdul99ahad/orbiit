@@ -50,4 +50,3 @@ export class UnauthorizedException extends AppError {
     super(message, HTTPSTATUS.UNAUTHORIZED, errorCode || ErrorCodeEnum.ACCESS_UNAUTHORIZED);
   }
 }
-

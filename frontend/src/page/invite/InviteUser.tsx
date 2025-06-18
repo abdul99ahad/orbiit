@@ -112,3 +112,4 @@ const InviteUser = () => {
 };
 
 export default InviteUser;
+

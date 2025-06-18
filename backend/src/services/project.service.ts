@@ -195,4 +195,3 @@ export const deleteProjectByIdAndWorkspaceIdService = async (
   await TaskModel.deleteMany({ project: projectId });
   return { project };
 };
-
