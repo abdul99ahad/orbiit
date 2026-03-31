@@ -5,7 +5,7 @@ export interface AccountDocument extends Document {
   provider: ProviderEnumType;
   providerId: string;
   userId: mongoose.Types.ObjectId;
-  refreshToken: string | null;
+  refreshToken: string | null | undefined;
   tokenExpiry: Date | null;
   createdAt: Date;
 }
@@ -40,7 +40,7 @@ const accountSchema = new Schema<AccountDocument>(
     timestamps: true,
     toJSON: {
       transform(doc, ret) {
-        delete ret.refreshToken;
+        ret.refreshToken = undefined;
       },
     },
   }
