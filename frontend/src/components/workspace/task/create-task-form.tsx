@@ -105,7 +105,7 @@ export default function CreateTaskForm(props: {
       message: 'AssignedTo is required',
     }),
     dueDate: z.date({
-      required_error: 'A date of birth is required.',
+      required_error: 'Due date is required.',
     }),
   });
 
