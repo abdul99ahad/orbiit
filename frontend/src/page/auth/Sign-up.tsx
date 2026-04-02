@@ -22,14 +22,17 @@ import { Input } from '@/components/ui/input';
 import Logo from '@/components/logo';
 import GoogleOauthButton from '@/components/auth/google-oauth-button';
 import { useMutation } from '@tanstack/react-query';
-import { registerMutationFn } from '@/lib/api';
+import { loginMutationFn, registerMutationFn } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
 import { CustomError } from '@/types/custom-error.type';
+import { useStore } from '@/store/store';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({ mutationFn: registerMutationFn });
+  const { mutate: login, isPending: isLoggingIn } = useMutation({ mutationFn: loginMutationFn });
+  const { setAccessToekn } = useStore();
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
   const formSchema = z.object({
@@ -54,11 +57,22 @@ const SignUp = () => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (isPending) return;
+    if (isPending || isLoggingIn) return;
     mutate(values, {
       onSuccess: () => {
-        const decodeUrl = returnUrl ? decodeURIComponent(returnUrl) : null;
-        navigate(decodeUrl || '/');
+        login(
+          { email: values.email, password: values.password },
+          {
+            onSuccess: (data) => {
+              setAccessToekn(data.access_token);
+              const decodeUrl = returnUrl ? decodeURIComponent(returnUrl) : null;
+              navigate(decodeUrl || `/workspace/${data.user.currentWorkspace}`);
+            },
+            onError: () => {
+              navigate('/');
+            },
+          }
+        );
       },
       onError: (err) => {
         const error = err as unknown as CustomError;
@@ -165,8 +179,8 @@ const SignUp = () => {
                           )}
                         />
                       </div>
-                      <Button disabled={isPending} type="submit" className="w-full">
-                        {isPending && <Loader className="animate-spin" />}
+                      <Button disabled={isPending || isLoggingIn} type="submit" className="w-full">
+                        {(isPending || isLoggingIn) && <Loader className="animate-spin" />}
                         Sign up
                       </Button>
                     </div>
