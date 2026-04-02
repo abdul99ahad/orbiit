@@ -25,6 +25,7 @@ import { useMutation } from '@tanstack/react-query';
 import { registerMutationFn } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
+import { CustomError } from '@/types/custom-error.type';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -59,9 +60,16 @@ const SignUp = () => {
         const decodeUrl = returnUrl ? decodeURIComponent(returnUrl) : null;
         navigate(decodeUrl || '/');
       },
-      onError: (error) => {
+      onError: (err) => {
+        const error = err as unknown as CustomError;
+        if (error.errors?.length) {
+          error.errors.forEach(({ field, message }) => {
+            form.setError(field as keyof z.infer<typeof formSchema>, { message });
+          });
+          return;
+        }
         toast({
-          title: 'Error',
+          title: 'Sign up failed',
           description: error.message,
           variant: 'destructive',
         });

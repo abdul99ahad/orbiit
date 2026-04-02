@@ -32,12 +32,14 @@ API.interceptors.response.use(
   async (error) => {
     const data = error.response?.data;
 
-    const customeError: CustomError = {
+    const customError: CustomError = {
       ...error,
+      message: data?.message || error.message || 'An unexpected error occurred.',
       errorCode: data?.errorCode || 'UNKNOWN_ERROR',
+      errors: data?.errors,
     };
 
-    return Promise.reject(customeError);
+    return Promise.reject(customError);
   }
 );
 

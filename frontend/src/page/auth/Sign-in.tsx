@@ -65,7 +65,7 @@ const SignIn = () => {
       },
       onError: (error) => {
         toast({
-          title: 'Error',
+          title: 'Sign in failed',
           description: error.message,
           variant: 'destructive',
         });
