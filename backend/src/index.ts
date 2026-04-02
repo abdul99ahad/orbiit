@@ -14,6 +14,7 @@ import workspaceRoutes from './routes/workspace.route';
 import memberRoutes from './routes/member.routes';
 import projectRoutes from './routes/project.routes';
 import taskRoutes from './routes/task.route';
+import chatRoutes from './chat/chat.route';
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -38,6 +39,7 @@ app.use(`${BASE_PATH}/workspace`, passportAuthenticationJWT, workspaceRoutes);
 app.use(`${BASE_PATH}/member`, passportAuthenticationJWT, memberRoutes);
 app.use(`${BASE_PATH}/project`, passportAuthenticationJWT, projectRoutes);
 app.use(`${BASE_PATH}/task`, passportAuthenticationJWT, taskRoutes);
+app.use(`${BASE_PATH}/chat`, passportAuthenticationJWT, chatRoutes);
 
 app.use(errorHandler);
 
