@@ -1,4 +1,4 @@
-import { ChevronDown, Loader } from 'lucide-react';
+import { ChevronDown, Loader, Trash2 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,13 @@ import { useAuthContext } from '@/context/auth-provider';
 import useWorkspaceId from '@/hooks/use-workspace-id';
 import useGetWorkspaceMembers from '@/hooks/api/use-get-workspace-members';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { changeWorkspaceMemberRoleMutationFn } from '@/lib/api';
+import { changeWorkspaceMemberRoleMutationFn, removeMemberMutationFn } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Permissions } from '@/constant';
 const AllMembers = () => {
   const { user, hasPermission } = useAuthContext();
   const canChabgeMemberRole = hasPermission(Permissions.CHANGE_MEMBER_ROLE);
+  const canRemoveMember = hasPermission(Permissions.REMOVE_MEMBER);
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
   const { data, isPending } = useGetWorkspaceMembers(workspaceId);
@@ -32,6 +33,33 @@ const AllMembers = () => {
   const { mutate, isPending: isLoading } = useMutation({
     mutationFn: changeWorkspaceMemberRoleMutationFn,
   });
+
+  const { mutate: removeMember, isPending: isRemoving } = useMutation({
+    mutationFn: removeMemberMutationFn,
+  });
+
+  const handleRemoveMember = (memberId: string) => {
+    removeMember(
+      { workspaceId, memberId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['members', workspaceId] });
+          toast({
+            title: 'Success',
+            description: 'Member removed successfully',
+            variant: 'success',
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: 'Error',
+            description: error.message,
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  };
 
   const handleSelect = (roleId: string, memberId: string) => {
     if (!roleId || !memberId) return;
@@ -165,6 +193,19 @@ const AllMembers = () => {
                   </PopoverContent>
                 )}
               </Popover>
+              {canRemoveMember &&
+                member.userId._id !== user?._id &&
+                member.role?.name !== 'OWNER' && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    disabled={isRemoving}
+                    onClick={() => handleRemoveMember(member.userId._id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
             </div>
           </div>
         );
