@@ -58,3 +58,31 @@ export const joinWorkspaceByInviteService = async (
 
   return { workspaceId: workspace._id, role: role.name };
 };
+
+export const removeMemberFromWorkspaceService = async (
+  requestingUserId: string,
+  workspaceId: string,
+  memberId: string
+) => {
+  const workspace = await WorkspaceModel.findById(workspaceId);
+  if (!workspace) {
+    throw new NotFoundException('Workspace not found');
+  }
+
+  // Prevent removing the workspace owner
+  if (workspace.owner.toString() === memberId) {
+    throw new BadRequestException('The workspace owner cannot be removed');
+  }
+
+  const memberToRemove = await MemberModel.findOne({
+    userId: memberId,
+    workspaceId,
+  });
+  if (!memberToRemove) {
+    throw new NotFoundException('Member not found in this workspace');
+  }
+
+  await MemberModel.deleteOne({ userId: memberId, workspaceId });
+
+  return { memberId };
+};

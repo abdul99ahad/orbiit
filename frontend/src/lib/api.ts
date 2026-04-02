@@ -94,6 +94,17 @@ export const changeWorkspaceMemberRoleMutationFn = async ({
   return response.data;
 };
 
+export const removeMemberMutationFn = async ({
+  workspaceId,
+  memberId,
+}: {
+  workspaceId: string;
+  memberId: string;
+}) => {
+  const response = await API.delete(`/member/workspace/${workspaceId}/remove/${memberId}`);
+  return response.data;
+};
+
 export const deleteWorkspaceMutationFn = async (
   workspaceId: string
 ): Promise<{
