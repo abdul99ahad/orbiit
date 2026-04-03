@@ -5,6 +5,7 @@ import RoleModel from '../models/roles-permission.model';
 import WorkspaceModel from '../models/workspace.model';
 import JoinRequestModel from '../models/join-request.model';
 import UserModel from '../models/user.model';
+import TaskModel from '../models/task.model';
 import {
   BadRequestException,
   NotFoundException,
@@ -86,6 +87,12 @@ export const removeMemberFromWorkspaceService = async (
   }
 
   await MemberModel.deleteOne({ userId: memberId, workspaceId });
+
+  // Unassign all tasks in this workspace that were assigned to the removed member
+  await TaskModel.updateMany(
+    { workspace: workspaceId, assignedTo: memberId },
+    { $set: { assignedTo: null } }
+  );
 
   return { memberId };
 };

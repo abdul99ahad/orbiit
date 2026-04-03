@@ -101,9 +101,7 @@ export default function CreateTaskForm(props: {
     priority: z.enum(Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum], {
       required_error: 'Priority is required',
     }),
-    assignedTo: z.string().trim().min(1, {
-      message: 'AssignedTo is required',
-    }),
+    assignedTo: z.string().trim().min(1).optional().nullable(),
     dueDate: z.date({
       required_error: 'Due date is required.',
     }),
