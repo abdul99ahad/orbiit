@@ -9,11 +9,13 @@ import {
 import AppLayout from '@/layout/app.layout';
 import BaseLayout from '@/layout/base.layout';
 import NotFound from '@/page/errors/NotFound';
+import { SocketProvider } from '@/context/socket-provider';
 
 function AppRoutes() {
   return (
     <HashRouter>
-      <Routes>
+      <SocketProvider>
+        <Routes>
         <Route element={<BaseLayout />}>
           {baseRoutePaths.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
@@ -38,7 +40,8 @@ function AppRoutes() {
         </Route>
         {/* Catch-all for undefined routes */}
         <Route path="*" element={<NotFound />} />
-      </Routes>
+        </Routes>
+      </SocketProvider>
     </HashRouter>
   );
 }

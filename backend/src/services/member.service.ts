@@ -94,6 +94,13 @@ export const removeMemberFromWorkspaceService = async (
     { $set: { assignedTo: null } }
   );
 
+  // Notify the removed member via WebSocket so their session is invalidated immediately
+  const io = getIO();
+  io.to(`user:${memberId}`).emit('workspace:kicked', {
+    workspaceId: workspaceId.toString(),
+    workspaceName: workspace.name,
+  });
+
   return { memberId };
 };
 
