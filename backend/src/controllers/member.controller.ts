@@ -2,20 +2,45 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../middlewares/asyncHandler.middleware';
 import { z } from 'zod';
 import { HTTPSTATUS } from '../config/http.config';
-import { joinWorkspaceByInviteService, removeMemberFromWorkspaceService } from '../services/member.service';
-import { getMemberRoleWorkspace } from '../services/member.service';
+import {
+  getMemberRoleWorkspace,
+  removeMemberFromWorkspaceService,
+  createJoinRequestService,
+  respondToJoinRequestService,
+} from '../services/member.service';
 import { Permissions } from '../enums/role.enum';
 import { roleGuard } from '../utils/roleGuard';
 
-export const joinWorkspaceController = asyncHandler(
+export const requestJoinWorkspaceController = asyncHandler(
   async (req: Request, res: Response) => {
     const inviteCode = z.string().parse(req.params.inviteCode);
     const userId = req.user?._id;
-    const { workspaceId, role } = await joinWorkspaceByInviteService(userId, inviteCode);
+
+    const { requestId, workspaceName } = await createJoinRequestService(userId, inviteCode);
+
     return res.status(HTTPSTATUS.OK).json({
-      message: 'Workspace joined successfully',
-      workspaceId,
-      role,
+      message: 'Join request submitted — waiting for approval',
+      requestId,
+      workspaceName,
+    });
+  }
+);
+
+export const respondToJoinRequestController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const workspaceId = z.string().parse(req.params.workspaceId);
+    const requestId = z.string().parse(req.params.requestId);
+    const action = z.enum(['approved', 'denied']).parse(req.body.action);
+    const userId = req.user?._id;
+
+    const { role } = await getMemberRoleWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.ADD_MEMBER]);
+
+    const result = await respondToJoinRequestService(requestId, action);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: `Join request ${action}`,
+      ...result,
     });
   }
 );

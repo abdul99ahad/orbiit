@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import passport from 'passport';
@@ -15,6 +16,7 @@ import memberRoutes from './routes/member.routes';
 import projectRoutes from './routes/project.routes';
 import taskRoutes from './routes/task.route';
 import chatRoutes from './chat/chat.route';
+import { initializeSocket } from './socket';
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -43,7 +45,10 @@ app.use(`${BASE_PATH}/chat`, passportAuthenticationJWT, chatRoutes);
 
 app.use(errorHandler);
 
-app.listen(config.PORT, async () => {
+const server = http.createServer(app);
+initializeSocket(server);
+
+server.listen(config.PORT, async () => {
   console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV} mode`);
   await connectDatabase();
 });

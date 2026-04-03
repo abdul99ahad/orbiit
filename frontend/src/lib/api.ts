@@ -117,13 +117,30 @@ export const deleteWorkspaceMutationFn = async (
 
 //*******MEMBER ****************
 
-export const invitedUserJoinWorkspaceMutationFn = async (
+export const requestJoinWorkspaceMutationFn = async (
   inviteCode: string
 ): Promise<{
   message: string;
-  workspaceId: string;
+  requestId: string;
+  workspaceName: string;
 }> => {
   const response = await API.post(`/member/workspace/${inviteCode}/join`);
+  return response.data;
+};
+
+export const respondToJoinRequestMutationFn = async ({
+  workspaceId,
+  requestId,
+  action,
+}: {
+  workspaceId: string;
+  requestId: string;
+  action: 'approved' | 'denied';
+}) => {
+  const response = await API.put(
+    `/member/workspace/${workspaceId}/join-request/${requestId}/respond`,
+    { action }
+  );
   return response.data;
 };
 
