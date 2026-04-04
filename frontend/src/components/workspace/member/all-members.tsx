@@ -1,7 +1,16 @@
 import { ChevronDown, Loader, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 import {
   Command,
@@ -30,6 +39,11 @@ const AllMembers = () => {
   const members = data?.members || [];
   const roles = data?.roles || [];
 
+  const [confirmMember, setConfirmMember] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const { mutate, isPending: isLoading } = useMutation({
     mutationFn: changeWorkspaceMemberRoleMutationFn,
   });
@@ -43,6 +57,7 @@ const AllMembers = () => {
       { workspaceId, memberId },
       {
         onSuccess: () => {
+          setConfirmMember(null);
           queryClient.invalidateQueries({ queryKey: ['members', workspaceId] });
           toast({
             title: 'Success',
@@ -201,7 +216,9 @@ const AllMembers = () => {
                     size="icon"
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     disabled={isRemoving}
-                    onClick={() => handleRemoveMember(member.userId._id)}
+                    onClick={() =>
+                      setConfirmMember({ id: member.userId._id, name: member.userId?.name })
+                    }
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -210,6 +227,36 @@ const AllMembers = () => {
           </div>
         );
       })}
+
+      <Dialog open={!!confirmMember} onOpenChange={(open) => !open && setConfirmMember(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove{' '}
+              <span className="font-semibold text-foreground">{confirmMember?.name}</span> from
+              this workspace? They will lose access to all projects and tasks.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmMember(null)}
+              disabled={isRemoving}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isRemoving}
+              onClick={() => confirmMember && handleRemoveMember(confirmMember.id)}
+            >
+              {isRemoving && <Loader className="h-4 w-4 animate-spin mr-1" />}
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
